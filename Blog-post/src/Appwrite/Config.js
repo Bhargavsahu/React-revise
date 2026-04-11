@@ -13,7 +13,7 @@ export class StoreService {
         this.Tables = new TablesDB(this.client)
         this.Bucket = new Storage(this.client)
     }
-    async CreatePost ({Title , slug , Content , FeaturedImage , Status , User_ID}) {
+    async CreatePost ({Title , slug , content , featuredImage , status , userId}) {
         try {
             return await this.Tables.createRow({
                 databaseId: conf.databaseid,
@@ -21,17 +21,17 @@ export class StoreService {
                 rowId: slug,
                 data: {
                     Title,
-                    Content,
-                    FeaturedImage,
-                    Status,
-                    User_ID
+                    content,
+                    featuredImage,
+                    status,
+                    userId
                 }
             })
         } catch (error) {
             throw error;
         }
     }
-    async UpdatePost (slug , {Title , Content , FeaturedImage , Status , User_ID}){
+    async UpdatePost (slug , {Title , content , featuredImage , status , userId}){
         try {
             return await this.Tables.updateRow({
                 databaseId: conf.databaseid,
@@ -39,17 +39,17 @@ export class StoreService {
                 rowId:slug,
                 data: {
                     Title,
-                    Content, 
-                    FeaturedImage,
-                    Status,
-                    User_ID
+                    content, 
+                    featuredImage,
+                    status,
+                    userId
                 }
             })
         } catch (error) {
             throw error;
         }
     }
-    async DeletePost ({slug}){
+    async DeletePost (slug){
         try {
             return await this.Tables.deleteRow({
                 databaseId: conf.databaseid,
@@ -60,7 +60,7 @@ export class StoreService {
             throw error;
         }
     }
-    async GetPost ({slug}){
+    async GetPost (slug){
         try {
             return await this.Tables.getRow({
                 databaseId:conf.databaseid,
@@ -77,7 +77,7 @@ export class StoreService {
                 databaseId:conf.databaseid,
                 tableId:conf.tableid,
                 queries:[
-                    Query.equal('Status' , 'Active')
+                    Query.equal('status' , 'active')
                 ]
             })
         } catch (error) {
@@ -120,5 +120,6 @@ export class StoreService {
     }
 }
 
-const service = new StoreService()
-export default service
+
+const storeService = new StoreService()
+export default storeService

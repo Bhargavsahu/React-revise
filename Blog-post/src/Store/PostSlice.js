@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-initialState = {
-    Posts: [],
+const initialState = {
+    posts: [],
     loading: false,
     error:null
 }
@@ -15,19 +15,23 @@ const PostSlice = createSlice({
             state.error = null
         },
         setPosts: (state , action) => {
-            state.Posts(action.payload)
+            state.posts = action.payload
+            state.loading = false;
         },
         addPost: (state , action) => {
             const post = action.payload
-            state.Posts.push(post)
+            state.posts.push(post)
         },
         updatePost: (state , action) => {
             const updatedPost = action.payload
-            state.Posts = state.Posts.map(post => post.slug === updatedPost.slug ? updatedPost : post)
+            state.posts = state.posts.map(post => post.slug === updatedPost.slug ? updatedPost : post)
         },
         deletePost: (state , action) => {
             const postslug = action.payload
-            state.Posts = state.Posts.filter(post => post.slug !== postslug)
+            state.posts = state.posts.filter(post => post.slug !== postslug)
+        },
+        clearPosts: (state , action) => {
+            state.posts = []
         },
         errorHandling: (state , action) => {
             state.error = action.payload;
@@ -36,5 +40,6 @@ const PostSlice = createSlice({
     }
 })
 
+export const {fetchStart , setPosts , addPost , updatePost , deletePost , clearPosts, errorHandling} = PostSlice.actions
 
 export default PostSlice.reducer
