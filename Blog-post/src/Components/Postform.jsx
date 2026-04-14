@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect ,useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Input, Btn, Select, RTE } from './Index'
 import storeService from '../Appwrite/Config'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector , useDispatch } from 'react-redux'
+import { addPost , updatePost } from '../Store/PostSlice'
 
 function Postform({ post }) {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { register, handleSubmit, watch, setValue, control, getValues , formState:{ errors } } = useForm({
     defaultValues: {
       Title: post?.Title || '',
@@ -21,30 +23,47 @@ function Postform({ post }) {
     try {
       if (post) {
         const file = data.image?.[0] ? await storeService.UploadFile({ file: data.image[0] }) : null;
-        if (file) {
+        if (file && post.featuredImage) {
           await storeService.DeleteFile({ fileId: post.featuredImage })
         }
-        const dbPost = await storeService.UpdatePost(post.slug, {
+        const dbPost = await storeService.UpdatePost(post.$id, {
           ...data,
           featuredImage: file ? file.$id : post.featuredImage
         })
         if (dbPost) {
+          const cleanPost = {
+            $id: dbPost.$id,
+            Title: dbPost.Title,
+            slug: dbPost.slug,
+            content: dbPost.content,
+            featuredImage: dbPost.featuredImage,
+            status: dbPost.status,
+            userId: dbPost.userId
+          }
+          dispatch(updatePost(cleanPost))
           navigate(`/post/${dbPost.slug}`)
         }
       } else {
-        const file = await storeService.UploadFile({ file: data.image[0] });
-
-        if (file) {
-          const fileId = file.$id
-          data.featuredImage = fileId;
-        }
+        let file = null;
+        if(data.image?.[0]) file = await storeService.UploadFile({ file: data.image[0] });
 
         const newpost = await storeService.CreatePost({
           ...data,
+          featuredImage: file ? file.$id : null,
           userId: userData.$id,
         });
 
         if (newpost) {
+          const cleanPost = {
+            $id: newpost.$id,
+            Title: newpost.Title,
+            slug: newpost.slug,
+            content: newpost.content,
+            featuredImage: newpost.featuredImage,
+            status: newpost.status,
+            userId: newpost.userId
+          }
+          dispatch(addPost(cleanPost))
           navigate(`/post/${newpost.slug}`);
         }
 
@@ -56,13 +75,14 @@ function Postform({ post }) {
 
   const slugTransform = useCallback((value) => {
     if(value && typeof value === 'string'){
-      return value
+      const slug = value
       .trim()
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')   
       .replace(/^-+|-+$/g, '');
+      return slug || 'untitled'
     }
-    return ''
+    return 'untitled'
   },[])
 
   useEffect(() => {
@@ -76,6 +96,19 @@ function Postform({ post }) {
       subscription.unsubscribe()
     }
   } , [watch , slugTransform , setValue])
+
+  const imageFile = watch('image')
+  const [previewUrl, setpreviewUrl] = useState(null)
+
+  useEffect(() => {
+    if(imageFile?.[0]) {
+      const url = URL.createObjectURL(imageFile[0])
+      setpreviewUrl(url)
+       return (() => {
+      URL.revokeObjectURL(url)
+      })
+    }
+  } , [imageFile])
 
   return (
     <form onSubmit={handleSubmit(submit)} className='flex flex-wrap'>
@@ -127,16 +160,20 @@ function Postform({ post }) {
           </p>
           )}
           {
-            post && (
+            previewUrl ? (
               <div className='w-full mb-4'>
-                <img src={storeService.GetFilePreview({fileId: post.featuredImage})} alt={post.Title} className='rounded-lg' />
+                <img src={previewUrl} alt={`preview`} className='rounded-lg' />
               </div>
-            )
+            ) : post?.featuredImage ? (
+              <div className='w-full mb-4'>
+                <img src={storeService.GetFilePreview(post.featuredImage)} alt="preview" className='rounded-lg' />
+              </div>
+            ) : null
           }
           <Select
             options = {['active' , 'inactive']}
-            label = 'status'
-            className = 'mb-4'
+            label = 'status : '
+            className = 'mb-4 outline-1'
             {...register('status' , {
               required: 'status is required'
             })}
@@ -146,7 +183,7 @@ function Postform({ post }) {
             {errors.status.message}
           </p>
           )}
-          <Btn type='submit' className='w-full' bgcolor={post ? 'bg-green-500' : undefined }>
+          <Btn type='submit' className={`w-full rounded-lg px-5 py-2 bg-green-500 hover:bg-green-700 `} >
             {post ? 'Update' : 'Post' }
           </Btn>
       </div>

@@ -19,7 +19,7 @@ const Select = React.forwardRef(({
         {...props} 
         id={id}
         ref={ref}
-        className={`${classname}`}
+        className={`${className}`}
         >
             {
                 options?.map((option) => (

@@ -27,8 +27,8 @@ const PostSlice = createSlice({
             state.posts = state.posts.map(post => post.slug === updatedPost.slug ? updatedPost : post)
         },
         deletePost: (state , action) => {
-            const postslug = action.payload
-            state.posts = state.posts.filter(post => post.slug !== postslug)
+            const postid = action.payload
+            state.posts = state.posts.filter(post => post.$id !== postid)
         },
         clearPosts: (state , action) => {
             state.posts = []

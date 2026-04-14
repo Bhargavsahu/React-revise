@@ -11,6 +11,7 @@ import Btn from './Btn'
 import Signup from './Signup'
 import RTE from './RTE'
 import Protected from './AuthLayout'
+import Postform from './Postform'
 
 export {
     Header,
@@ -25,5 +26,6 @@ export {
     Btn,
     Signup,
     RTE,
-    Protected
+    Protected,
+    Postform
 }

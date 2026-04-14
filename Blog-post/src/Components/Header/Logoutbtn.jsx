@@ -21,7 +21,7 @@ function Logoutbtn() {
     }
   return ( 
     <button onClick={logoutHandler} disabled={Loggingout}>
-        {Loggingout ? 'logging out...' : 'logout'}
+        {Loggingout ? 'Logging out...' : 'Logout'}
     </button>
   )
 }

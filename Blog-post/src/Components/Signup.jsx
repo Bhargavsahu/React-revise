@@ -1,10 +1,11 @@
-import React from 'react'
+import React , { useState } from 'react'
 import { Btn, Input, Logo } from './Index'
 import authservice from '../Appwrite/auth'
 import { login as authLogin } from '../Store/AuthSlice'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
+import { Link } from 'react-router-dom'
 
 
 function Signup() {
@@ -19,12 +20,17 @@ function Signup() {
             if (session) {
                 const userData = await authservice.GetCurrentUser()
                 if (userData) {
-                    dispatch(authLogin(userData))
+                    const cleanData = {
+                        $id: userData.$id,
+                        email: userData.email,
+                        password: userData.password
+                    }
+                    dispatch(authLogin(cleanData))
                     navigate('/')
                 }
             }
         } catch (error) {
-            setError(error.message)
+            setError(error?.message || 'something went wrong :: signuphandler')
         }
     }
     return (
@@ -62,14 +68,14 @@ function Signup() {
                     {...register('email' , {
                         required:true,
                         validate: {
-                            matchPattern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+                            matchPattern: (value) => /^\S+@\S+\.\S+$/.test(value) ||
                         "Email address must be a valid address",
                         }
                     })}
                     />
                     <Input
                     label='password:'
-                    type='text'
+                    type='password'
                     placeholder='Enter your password'
                     {...register('password' , {
                         required:true

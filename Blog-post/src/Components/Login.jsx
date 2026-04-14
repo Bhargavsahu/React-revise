@@ -19,12 +19,17 @@ function Login() {
             if(session){
                 const userData = await authservice.GetCurrentUser()
                 if(userData) {
-                    dispatch(storeLogin(userData))
+                    const cleanData = {
+                        $id: userData.$id,
+                        email: userData.email,
+                        password: userData.password
+                    }
+                    dispatch(storeLogin(cleanData))
                     navigate('/')
                 }
             }
         } catch (error) {
-            setError(error.message)
+            setError(error?.message || 'Something went wrong loginHandler')
         }
     }
   return (
@@ -53,7 +58,7 @@ function Login() {
                     placeholder = 'Enter your email'
                     type = 'email'
                     {...register("email" , {
-                        required:true,
+                        required:'Email is required',
                         validate:{
                             matchPattern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
                         "Email address must be a valid address",
@@ -65,7 +70,7 @@ function Login() {
                     type='password'
                     placeholder='enter your password'
                     {...register('password' , {
-                        required:true
+                        required:'password is required'
                     })}
                     />
                     <Btn className='w-full' type='submit'>Sign in</Btn>

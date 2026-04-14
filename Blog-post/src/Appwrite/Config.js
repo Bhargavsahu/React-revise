@@ -18,9 +18,10 @@ export class StoreService {
             return await this.Tables.createRow({
                 databaseId: conf.databaseid,
                 tableId: conf.tableid,
-                rowId: slug,
+                rowId: ID.unique(),
                 data: {
                     Title,
+                    slug,
                     content,
                     featuredImage,
                     status,
@@ -31,15 +32,16 @@ export class StoreService {
             throw error;
         }
     }
-    async UpdatePost (slug , {Title , content , featuredImage , status , userId}){
+    async UpdatePost ($id , {Title , content , slug , featuredImage , status , userId}){
         try {
             return await this.Tables.updateRow({
                 databaseId: conf.databaseid,
                 tableId: conf.tableid,
-                rowId:slug,
+                rowId:$id,
                 data: {
                     Title,
                     content, 
+                    slug,
                     featuredImage,
                     status,
                     userId
@@ -49,23 +51,23 @@ export class StoreService {
             throw error;
         }
     }
-    async DeletePost (slug){
+    async DeletePost ({$id}){
         try {
             return await this.Tables.deleteRow({
                 databaseId: conf.databaseid,
                 tableId: conf.tableid,
-                rowId:slug
+                rowId:$id
             })
         } catch (error) {
             throw error;
         }
     }
-    async GetPost (slug){
+    async GetPost ({$id}){
         try {
             return await this.Tables.getRow({
                 databaseId:conf.databaseid,
                 tableId:conf.tableid,
-                rowId:slug
+                rowId:$id
             })
         } catch (error) {
             throw error;
@@ -108,14 +110,15 @@ export class StoreService {
             throw error;
         }
     }
-    async GetFilePreview({fileId}){
+    GetFilePreview(fileId){
         try {
-            return await this.Bucket.getFilePreview({
+            const session =  this.Bucket.getFileView({
                 bucketId:conf.bucketid,
-                fileId:fileId
-            })
+                fileId: fileId
+            }).toString();
+            return session
         } catch (error) {
-            throw error;
+            console.log(error)
         }
     }
 }
